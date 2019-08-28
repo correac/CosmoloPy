@@ -1,52 +1,20 @@
 """Perturbation theory and the power spectrum routines.
 
-This module relies largely on power.c from Eisenstein & Hu (1999 ApJ 511 5)
+This module relies largely on fitting equations from Eisenstein & Hu (1999 ApJ 511 5)
 
-  http://background.uchicago.edu/~whu/transfer/transferpage.html
-
-See notes in `cosmolopy.EH`.
+http://background.uchicago.edu/~whu/transfer/transferpage.html
 
 """
 
-import math
-import warnings
-
-import numpy
+import numpy as np
 import scipy
 import scipy.special
 import scipy.integrate as si
+import Cosmolopy.constants as cc
+import Cosmolopy.density as cden
 
-import constants as cc
-import density as cden
 
-powererror = None
-try:
-    import EH.power as power
-    havepower = True
-except ImportError as ie:
-    havepower = False
-    powererror = ie
-    pass
-
-tffiterror = None
-try:
-    import EH.tf_fit as tf_fit
-    havetffit = True
-except ImportError as ie:
-    havetffit = False
-    tffiterror = ie
-    pass
-
-# Turn on printing of special function error messages.
-#scipy.special.errprint(1)
-
-@numpy.vectorize
-def _vec_transfer_func(k,baryonic_effects=False):
-    if baryonic_effects:
-        return (tf_fit.TFfit_onek(k), power.TFmdm_onek_mpc(k))
-    else:
-        return (power.TFmdm_onek_mpc(k), power.cvar.tf_cbnu)
-def transfer_function_EH(k, **cosmology):
+def transfer_function(k, **cosmology):
     """The transfer function as a function of wavenumber k.
 
     Parameters
@@ -84,21 +52,13 @@ def transfer_function_EH(k, **cosmology):
 
     """
     baryonic_effects = cosmology['baryonic_effects']
-    if baryonic_effects:
-        if not havetffit:
-            raise ImportError, "Could not import EH.tf_fit module. Transfer function cannot be calculated."
-        if not havepower:
-            raise ImportError, "Could not import EH.power module. Transfer function cannot be calculated."
-    else:
-        if not havepower:
-            raise ImportError, "Could not import EH.power module. Transfer function cannot be calculated."
 
-    z_val=0
+    z_val = 0
 
     if not baryonic_effects:
         # Baryonic effect are not used. Default to more general CDM variants transfer function.
         #
-        # /* TFmdm_set_cosm() -- User passes all the cosmological parameters as
+        #   TF() -- User passes all the cosmological parameters as
         # 	arguments; the routine sets up all of the scalar quantites needed 
         # 	computation of the fitting formula.  The input parameters are: 
         # 	1) omega_matter -- Density of CDM, baryons, and massive neutrinos,
@@ -108,20 +68,13 @@ def transfer_function_EH(k, **cosmology):
         # 	4) degen_hdm    -- (Int) Number of degenerate massive neutrino species 
         # 	5) omega_lambda -- Cosmological constant 
         # 	6) hubble       -- Hubble constant, in units of 100 km/s/Mpc 
-        # 	7) redshift     -- The redshift at which to evaluate */
-        if int(cosmology['N_nu']) != cosmology['N_nu']:
-            raise TypeError('N_nu must be an integer.')
-        power.TFmdm_set_cosm(cosmology['omega_M_0'], cosmology['omega_b_0'], 
-                             cosmology['omega_n_0'],  int(cosmology['N_nu']), 
-                             cosmology['omega_lambda_0'], cosmology['h'], 
-                             z_val)
+        # 	7) redshift     -- The redshift at which to evaluate
+        
+        if int(cosmology['N_nu']) != cosmology['N_nu']: raise TypeError('N_nu must be an integer.')
+        TF = Transfer_function(z_val,**cosmology)
+        tf_cb, tf_cbnu = TF.TF_k_mpc(k)
+        return tf_cb, tf_cbnu
     
-        # Given a wavenumber in Mpc^-1, return the transfer function for
-        # the cosmology held in the global variables.
-        if numpy.isscalar(k):
-            return (power.TFmdm_onek_mpc(k), power.cvar.tf_cbnu)
-        else:
-            return _vec_transfer_func(k)
     else:
         # Baryonic effects are in use. This reduces the range of validity of the 
         #  transfer function, for instance by not including effects from neutrinos.
@@ -136,14 +89,17 @@ def transfer_function_EH(k, **cosmology):
         omhh = cosmology['omega_M_0'] * cosmology['h'] * cosmology['h']
         fbaryon = cosmology['omega_b_0'] / cosmology['omega_M_0']
         Tcmb = 2.728
-        tf_fit.TFset_parameters(omhh, fbaryon, Tcmb)
+        #tf_fit.TFset_parameters(omhh, fbaryon, Tcmb)
 
         # Given a wavenumber in Mpc^-1, return the transfer function for
         # the cosmology held in the global variables.
-        if numpy.isscalar(k):
-            return (tf_fit.TFfit_onek(k), power.TFmdm_onek_mpc(k))
-        else:
-            return _vec_transfer_func(k, baryonic_effects)
+        #if np.isscalar(k):
+        #    return (tf_fit.TFfit_onek(k), power.TFmdm_onek_mpc(k))
+        #else:
+        #    return _vec_transfer_func(k, baryonic_effects)
+        TF = Transfer_function(z_val,**cosmology)
+        tf_cb, tf_cbnu = TF.TF_k_mpc(k)
+        return tf_cb, tf_cbnu
 
 
 def fgrowth(z, omega_M_0, unnormed=False):
@@ -211,7 +167,7 @@ def w_tophat(k, r):
       the value of the transformed function at wavenumber k.
     
     """
-    return (3. * ( numpy.sin(k * r) - k * r * numpy.cos(k * r) ) / 
+    return (3. * ( np.sin(k * r) - k * r * np.cos(k * r) ) /
             ((k * r)**3.))
 
 def w_gauss(k, r):
@@ -235,59 +191,59 @@ def w_gauss(k, r):
       the value of the transformed function at wavenumber k.
     
     """
-    return numpy.exp( -(k * r)**2./2. )
+    return np.exp( -(k * r)**2./2. )
 
 def _sigmajsq_integrand_log(logk, r, j, cosmology):
     """Integrand used internally by the sigma_j function.
     """
-    k = numpy.exp(logk)
+    k = np.exp(logk)
     # The 1e-10 factor in the integrand is added to avoid roundoff
     # error warnings. It is divided out later.
     return (k *
-            (1.e-10 / (2. * math.pi**2.)) * k**(2.*(j+1.)) * 
+            (1.e-10 / (2. * np.pi**2.)) * k**(2.*(j+1.)) *
             w_gauss(k, r)**2. * 
             power_spectrum(k, 0.0, **cosmology))
 
 def _sigmasq_integrand_log(logk, r, cosmology):
     """Integrand used internally by the sigma_r function.
     """
-    k = numpy.exp(logk)
+    k = np.exp(logk)
     # The 1e-10 factor in the integrand is added to avoid roundoff
     # error warnings. It is divided out later.
     return (k *
-            (1.e-10 / (2. * math.pi**2.)) * k**2. * 
+            (1.e-10 / (2. * np.pi**2.)) * k**2. *
             w_tophat(k, r)**2. * 
             power_spectrum(k, 0.0, **cosmology))
 
 def _klimsj(r, j, cosmology):
     """Integration limits used internally by the sigma_j function."""
-    logk = numpy.arange(-20., 20., 0.1)
+    logk = np.arange(-20., 20., 0.1)
     integrand = _sigmajsq_integrand_log(logk, r, j, cosmology)
 
-    maxintegrand = numpy.max(integrand)
+    maxintegrand = np.max(integrand)
     factor = 1.e-4
     highmask = integrand > maxintegrand * factor
     while highmask.ndim > logk.ndim:
-        highmask = numpy.logical_or.reduce(highmask)
+        highmask = np.logical_or.reduce(highmask)
 
-    mink = numpy.min(logk[highmask])
-    maxk = numpy.max(logk[highmask])
+    mink = np.min(logk[highmask])
+    maxk = np.max(logk[highmask])
 
     return mink, maxk
 
 def _klims(r, cosmology):
     """Integration limits used internally by the sigma_r function."""
-    logk = numpy.arange(-20., 20., 0.1)
+    logk = np.arange(-20., 20., 0.1)
     integrand = _sigmasq_integrand_log(logk, r, cosmology)
 
-    maxintegrand = numpy.max(integrand)
+    maxintegrand = np.max(integrand)
     factor = 1.e-4
     highmask = integrand > maxintegrand * factor
     while highmask.ndim > logk.ndim:
-        highmask = numpy.logical_or.reduce(highmask)
+        highmask = np.logical_or.reduce(highmask)
 
-    mink = numpy.min(logk[highmask])
-    maxk = numpy.max(logk[highmask])
+    mink = np.min(logk[highmask])
+    maxk = np.max(logk[highmask])
 
     return mink, maxk
  
@@ -337,7 +293,7 @@ def _sigmasq_r_scalar(r,
                               limit=10000)#, epsabs=1e-9, epsrel=1e-9)
     return 1.e10 * integral, 1.e10 * error
 
-_sigmasq_r_vec = numpy.vectorize(_sigmasq_r_scalar)
+_sigmasq_r_vec = np.vectorize(_sigmasq_r_scalar)
 
 def _sigmasq_j_scalar(r, j, 
                       n, deltaSqr, omega_M_0, omega_b_0, omega_n_0, N_nu, 
@@ -387,7 +343,7 @@ def _sigmasq_j_scalar(r, j,
                               limit=10000)#, epsabs=1e-9, epsrel=1e-9)
     return 1.e10 * integral, 1.e10 * error
 
-_sigmasq_j_vec = numpy.vectorize(_sigmasq_j_scalar)
+_sigmasq_j_vec = np.vectorize(_sigmasq_j_scalar)
 
 def sigma_j(r, j, z, **cosmology):
     r"""Sigma statistic of order j for gaussian field of variancea r at redshift z.
@@ -430,10 +386,10 @@ def sigma_j(r, j, z, **cosmology):
     if 'deltaSqr' not in cosmology:
         cosmology['deltaSqr'] = norm_power(**cosmology)
     
-    #Uses 'n', as well as (for transfer_function_EH), 'omega_M_0',
+    #Uses 'n', as well as (for transfer_function), 'omega_M_0',
     #'omega_b_0', 'omega_n_0', 'N_nu', 'omega_lambda_0', and 'h'.
 
-    if numpy.isscalar(r):
+    if np.isscalar(r):
         sigmasq_0, errorsq_0 = _sigmasq_j_scalar(r, j,
                                                  cosmology['n'],
                                                  cosmology['deltaSqr'],
@@ -455,7 +411,7 @@ def sigma_j(r, j, z, **cosmology):
                                               cosmology['omega_lambda_0'],
                                               cosmology['h'],
                                               cosmology['baryonic_effects'],)
-    sigma = numpy.sqrt(sigmasq_0) * fg
+    sigma = np.sqrt(sigmasq_0) * fg
 
     # Propagate the error on sigmasq_0 to sigma.
     error = fg * errorsq_0 / (2. * sigmasq_0)
@@ -500,10 +456,10 @@ def sigma_r(r, z, **cosmology):
     if 'deltaSqr' not in cosmology:
         cosmology['deltaSqr'] = norm_power(**cosmology)
     
-    #Uses 'n', as well as (for transfer_function_EH), 'omega_M_0',
+    #Uses 'n', as well as (for transfer_function), 'omega_M_0',
     #'omega_b_0', 'omega_n_0', 'N_nu', 'omega_lambda_0', and 'h'.
 
-    if numpy.isscalar(r):
+    if np.isscalar(r):
         sigmasq_0, errorsq_0 = _sigmasq_r_scalar(r,
                                                  cosmology['n'],
                                                  cosmology['deltaSqr'],
@@ -525,7 +481,7 @@ def sigma_r(r, z, **cosmology):
                                               cosmology['omega_lambda_0'],
                                               cosmology['h'],
                                               cosmology['baryonic_effects'],)
-    sigma = numpy.sqrt(sigmasq_0) * fg
+    sigma = np.sqrt(sigmasq_0) * fg
 
     # Propagate the error on sigmasq_0 to sigma.
     error = fg * errorsq_0 / (2. * sigmasq_0)
@@ -542,20 +498,15 @@ def norm_power(**cosmology):
     deltaSqr = (cosmology['sigma_8'] / 
                 sigma_r(8.0 / cosmology['h'], 0.0, **cosmology)[0] 
                 )**2.0
-    #print " deltaSqr = %.3g" % deltaSqr
 
     del cosmology['deltaSqr']
     sig8 = sigma_r(8.0 / cosmology['h'], 0.0, deltaSqr=deltaSqr, 
                    **cosmology)[0]
-    #print " Input     sigma_8 = %.3g" % cosmology['sigma_8']
-    #print " Numerical sigma_8 = %.3g" % sig8
+
     sigma_8_error = (sig8 - cosmology['sigma_8'])/cosmology['sigma_8']
     if sigma_8_error > 1e-4:
         warnings.warn("High sigma_8 fractional error = %.3g" % sigma_8_error)
     return deltaSqr
-
-#def rho_crit(h):
-#  return 3.0 * (h * H100)**2. / ( 8.0 * math.pi * G)
 
 def power_spectrum(k, z, **cosmology):
     r"""The matter power spectrum P(k,z).
@@ -571,7 +522,7 @@ def power_spectrum(k, z, **cosmology):
     -----------------------
     
     Uses 'n', and either 'sigma_8' or 'deltaSqr', as well as, for
-    transfer_function_EH, 'omega_M_0', 'omega_b_0', 'omega_n_0',
+    transfer_function, 'omega_M_0', 'omega_b_0', 'omega_n_0',
     'N_nu', 'omega_lambda_0', and 'h'.
     
 
@@ -602,7 +553,8 @@ def power_spectrum(k, z, **cosmology):
     else:
         deltaSqr = norm_power(**cosmology)
 
-    transFunc = transfer_function_EH(k, **cosmology)[0]
+    tf_cb, tf_cbnu = transfer_function(k, **cosmology)
+    transFunc = tf_cb #transfer_function(k, **cosmology)[0]
 
     # This equals D1(z)/D1(0)
     growthFact = fgrowth(z, omega_M_0)
@@ -617,7 +569,7 @@ def power_spectrum(k, z, **cosmology):
     # k^n * tk^2 * (2 pi^2) * (sigma8/sig8)^2 * D^2
     # Just a different normalization.
 
-    ps = (deltaSqr * (2. * math.pi**2.) * k**n *
+    ps = (deltaSqr * (2. * np.pi**2.) * k**n *
           (cc.c_light_Mpc_s / (h * cc.H100_s))**(3. + n) * 
           (transFunc * growthFact)**2.)
     
@@ -645,9 +597,9 @@ def volume_radius_dmdr(mass, **cosmology):
     rho_crit, rho_0 = cden.cosmo_densities(**cosmology)
 
     volume  = mass / rho_0
-    r  = (volume / ((4. / 3.) * math.pi))**(1./3.)
+    r  = (volume / ((4. / 3.) * np.pi))**(1./3.)
     
-    dmdr = 4. * math.pi * r**2. * rho_0
+    dmdr = 4. * np.pi * r**2. * rho_0
 
     return volume, r, dmdr
 
@@ -680,7 +632,7 @@ def radius_to_mass(r, **cosmology):
     Uses the mean density of the universe.
 
     """
-    volume = (4./3.) * math.pi * r**3.
+    volume = (4./3.) * np.pi * r**3.
     
     if 'rho_0' in cosmology:
         rho_0 = cosmology['rho_0']
@@ -718,7 +670,7 @@ def virial_temp(mass, z, mu=None, **cosmology):
     omega_M_0 = cosmology['omega_M_0']
     omega = cden.omega_M_z(z, **cosmology)
     d = omega - 1
-    deltac = 18. * math.pi**2. + 82. * d - 39. * d**2.
+    deltac = 18. * np.pi**2. + 82. * d - 39. * d**2.
 
     if mu is None:
         mu_t = 1.22
@@ -726,7 +678,7 @@ def virial_temp(mass, z, mu=None, **cosmology):
         mu_t = mu
     temp = (1.98e4 * 
             (mass * cosmology['h']/1.0e8)**(2.0/3.0) * 
-            (omega_M_0 * deltac / (omega * 18. * math.pi**2.))**(1.0/3.0) * 
+            (omega_M_0 * deltac / (omega * 18. * np.pi**2.))**(1.0/3.0) *
             ((1 + z) / 10.0) * 
             (mu_t / 0.6))
 
@@ -929,7 +881,7 @@ def collapse_fraction(sigma_min, delta_crit, sigma_mass=0, delta=0):
     """
 
     fraction = scipy.special.erfc((delta_crit - delta) / 
-                                  (numpy.sqrt(2. * 
+                                  (np.sqrt(2. *
                                               (sigma_min**2. - sigma_mass**2.)
                                               )
                                    ))
