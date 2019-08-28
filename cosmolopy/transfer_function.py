@@ -38,6 +38,7 @@
 """
 import numpy as np
 
+
 class Transfer_function:
     
     """ This routine takes cosmological parameters and a redshift and sets up
@@ -57,17 +58,17 @@ class Transfer_function:
         
         Sets many global variables for use in TF_k_mpc() """
     
-    def __init__(self, redshift,**cosmo):
+    def __init__(self, redshift, cosmo):
         
         # Set this for TF_k_mpc(), the routine crashes if baryons or neutrinos are zero #
         self.num_degen_hdm = int(cosmo['N_nu']) # Number of degenerate massive neutrino species #
         self.omega_baryon = cosmo['omega_b_0']
         self.omega_hdm = cosmo['omega_n_0']
         if self.num_degen_hdm<1: self.num_degen_hdm=1
-        if self.omega_baryon<=0: self.omega_baryon=1e-5;
-        if self.omega_hdm<=0: self.omega_hdm=1e-5;
+        if self.omega_baryon<=0: self.omega_baryon=1e-5
+        if self.omega_hdm<=0: self.omega_hdm=1e-5
         
-        self.theta_cmb = 2.728/2.7;    # The temperature of the CMB, in units of 2.7 K, assuming T_cmb = 2.728 K #
+        self.theta_cmb = 2.728/2.7    # The temperature of the CMB, in units of 2.7 K, assuming T_cmb = 2.728 K #
         self.omega_curv = 1.0-cosmo['omega_M_0']-cosmo['omega_lambda_0']
         self.omhh = cosmo['omega_M_0'] * np.sqrt(cosmo['h'])
         self.obhh = self.omega_baryon * np.sqrt(cosmo['h'])
@@ -179,9 +180,9 @@ class Transfer_function:
         tf_cbnu = tf_master * growth_cbnu / self.growth_k0
         
         # tf_cb: The transfer function for density-weighted CDM + Baryon perturbations #
-        # tf_cbnu: /* The transfer function for density-weighted CDM + Baryon + Massive Neutrino perturbations. #
+        # tf_cbnu: The transfer function for density-weighted CDM + Baryon + Massive Neutrino perturbations. #
         return tf_cb, tf_cbnu
-    
+
     def TF_k_hmpc(self,kk):
         """
             Given a wavenumber in h Mpc^-1, return the transfer function (TF) for the
@@ -192,9 +193,8 @@ class Transfer_function:
             CDM + Baryon perturbations.
             growth_cbnu -- the transfer function for density-weighted
             CDM + Baryon + Massive Neutrino perturbations.
-            The function returns growth_cb """
+            The function returns growth_cb
+        """
         
-        return self.TF_k_mpc(kk * self.hubble);
+        return self.TF_k_mpc(kk * self.hubble)
     
-
-

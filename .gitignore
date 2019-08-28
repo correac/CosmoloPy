@@ -6,3 +6,4 @@ cosmolopy/EH/*.so
 CosmoloPy.egg-info/
 build/
 dist/
+.idea/
