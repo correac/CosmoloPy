@@ -41,21 +41,21 @@ class TransferFunction:
         
     Sets many global variables for use in tf_k_mpc() """
     
-    def __init__(self, redshift, cosmo):
+    def __init__(self, redshift, **cosmo):
         
         # Set this for TF_k_mpc(), the routine crashes if baryons or neutrinos are zero #
         self.num_degen_hdm = int(cosmo['N_nu']) # Number of degenerate massive neutrino species #
         self.omega_baryon = cosmo['omega_b_0']
         self.omega_hdm = cosmo['omega_n_0']
-        if self.num_degen_hdm<1: self.num_degen_hdm=1
+        if self.num_degen_hdm<1: self.num_degen_hdm=1.0
         if self.omega_baryon<=0: self.omega_baryon=1e-5
         if self.omega_hdm<=0: self.omega_hdm=1e-5
         
         self.theta_cmb = 2.728/2.7    # The temperature of the CMB, in units of 2.7 K, assuming T_cmb = 2.728 K #
         self.omega_curv = 1.0-cosmo['omega_M_0']-cosmo['omega_lambda_0']
-        self.omhh = cosmo['omega_M_0'] * np.sqrt(cosmo['h'])
-        self.obhh = self.omega_baryon * np.sqrt(cosmo['h'])
-        self.onhh = self.omega_hdm * np.sqrt(cosmo['h'])
+        self.omhh = cosmo['omega_M_0'] * cosmo['h']**2
+        self.obhh = self.omega_baryon * cosmo['h']**2
+        self.onhh = self.omega_hdm * cosmo['h']**2
         self.f_baryon = self.omega_baryon/cosmo['omega_M_0'] # Baryon fraction #
         self.f_hdm = self.omega_hdm/cosmo['omega_M_0'] # Massive Neutrino fraction #
         self.f_cdm = 1.0-self.f_baryon-self.f_hdm # CDM fraction #
@@ -63,32 +63,32 @@ class TransferFunction:
         self.f_bnu = self.f_baryon+self.f_hdm # Baryon + Massive Neutrino fraction #
         
         # Compute the equality scale. #
-        # z_equality Redshift of matter-radiation equality #
-        self.z_equality = 25000.0*self.omhh/np.sqrt(np.sqrt(self.theta_cmb))    # Actually 1+z_eq #
-        self.k_equality = 0.0746*self.omhh/np.sqrt(self.theta_cmb) # The comoving wave number of the horizon at equality #
+        # z_equality Redshift of matter-radiation equality, eq. (1) #
+        self.z_equality = 25000.0*self.omhh/self.theta_cmb**4   # Actually 1+z_eq #
+        self.k_equality = 0.0746*self.omhh/self.theta_cmb**2 # The comoving wave number of the horizon at equality #
         
-        # Compute the drag epoch and sound horizon #
-        z_drag_b1 = 0.313 * self.omhh**(-0.419) * (1+0.607 * self.omhh**(0.674))
-        z_drag_b2 = 0.238 * self.omhh**(0.223)
+        # Compute the drag epoch and sound horizon, eq. (2) #
+        z_drag_b1 = 0.313 * self.omhh**(-0.419) * (1+0.607 * self.omhh**0.674)
+        z_drag_b2 = 0.238 * self.omhh**0.223
         # z_drag Redshift of the drag epoch #
-        self.z_drag = 1291. * self.omhh**(0.251)/(1.0+0.659 * self.omhh**(0.828))
+        self.z_drag = 1291. * self.omhh**0.251/(1.0+0.659 * self.omhh**0.828)
         self.z_drag *= (1.0 + z_drag_b1 * self.obhh**(z_drag_b2))
         y_drag = self.z_equality / (1.0+self.z_drag)
         
-        # The sound horizon at the drag epoch #
+        # The sound horizon at the drag epoch, units Mpc, eq. (4) #
         self.sound_horizon_fit = 44.5 * np.log(9.83/self.omhh) / np.sqrt(1.0+10.0 * self.obhh**(0.75))
         
         # Set up for the free-streaming & infall growth function #
-        self.p_c = 0.25 * (5.0-np.sqrt(1+24.0 * self.f_cdm)) # The correction to the exponent before drag epoch #
-        self.p_cb = 0.25 * (5.0-np.sqrt(1+24.0 * self.f_cb)) # The correction to the exponent after drag epoch #
+        self.p_c = 0.25 * (5.0-np.sqrt(1.0+24.0 * self.f_cdm)) # The correction to the exponent before drag epoch #
+        self.p_cb = 0.25 * (5.0-np.sqrt(1.0+24.0 * self.f_cb)) # The correction to the exponent after drag epoch #
         
         omega_denom = cosmo['omega_lambda_0']
-        omega_denom += np.sqrt(1.0+redshift)*(self.omega_curv+cosmo['omega_M_0']*(1.0+redshift))
+        omega_denom += (1.0+redshift)**2*(self.omega_curv+cosmo['omega_M_0']*(1.0+redshift))
         
         # Omega_lambda at the given redshift #
         self.omega_lambda_z = cosmo['omega_lambda_0']/omega_denom
         # Omega_matter at the given redshift #
-        self.omega_matter_z = cosmo['omega_M_0'] * np.sqrt(1.0+redshift)*(1.0+redshift)/omega_denom
+        self.omega_matter_z = cosmo['omega_M_0'] * (1.0+redshift)**3/omega_denom
         
         # D_1(z) -- the growth function as k->0 #
         self.growth_k0 = self.z_equality/(1.0+redshift) * 2.5 * self.omega_matter_z
@@ -97,7 +97,7 @@ class TransferFunction:
         self.growth_k0 /= ratio
         
         # D_1(z)/D_1(0) -- the growth relative to z=0  #
-        self.growth_to_z0 = self.z_equality*2.5*cosmo['omega_M_0']
+        self.growth_to_z0 = self.z_equality * 2.5 * cosmo['omega_M_0']
         ratio = cosmo['omega_M_0']**(4.0/7.0)-cosmo['omega_lambda_0']
         ratio += (1.0+cosmo['omega_M_0']/2.0) * (1.0+cosmo['omega_lambda_0']/70.0)
         self.growth_to_z0 /= ratio
@@ -129,35 +129,36 @@ class TransferFunction:
         growth_cbnu -- the transfer function for density-weighted CDM + Baryon + Massive Neutrino perturbations.
         """
         # Wavenumber rescaled by \Gamma #
-        qq = kk / self.omhh * np.sqrt(self.theta_cmb)
+        qq = kk / self.omhh * self.theta_cmb**2
         
         # The epoch of free-streaming for a given scale #
         y_freestream = 17.2 * self.f_hdm * (1.+0.488 * self.f_hdm**(-7.0/6.0))
-        y_freestream *= np.sqrt(self.num_degen_hdm * qq / self.f_hdm)
+        y_freestream *= (self.num_degen_hdm * qq / self.f_hdm)**2
         
         temp1 = self.growth_k0**(1.0-self.p_cb)
-        temp2 = (self.growth_k0/(1+y_freestream))**(0.7)
+        temp2 = (1.0+self.growth_k0)/(1.0+y_freestream)
+        temp3 = self.growth_k0/(1.0+y_freestream)
         # Growth factor for CDM+Baryon perturbations #
-        growth_cb = (1.0+temp2)**(self.p_cb/0.7) * temp1
+        growth_cb = temp2**(self.p_cb/0.7) * temp1
         # Growth factor for CDM+Baryon+Neutrino pert. #
-        growth_cbnu = (self.f_cb**(0.7/self.p_cb)+temp2)**(self.p_cb/0.7) * temp1
+        growth_cbnu = (self.f_cb**(0.7/self.p_cb)+temp3)**(self.p_cb/0.7) * temp1
         
         # Compute the master function #
-        ratio = 1.+np.sqrt(np.sqrt(kk*self.sound_horizon_fit*0.43))
+        ratio = 1.+(kk*self.sound_horizon_fit*0.43)**4
         gamma_eff = self.omhh * (self.alpha_gamma+(1.-self.alpha_gamma)/ratio)
         # Wavenumber rescaled by effective Gamma #
         qq_eff = qq * self.omhh / gamma_eff
         
         # Calculate Suppressed TF #
-        tf_sup_L = np.log(2.71828+1.84 * self.beta_c * self.alpha_gamma * qq_eff)
-        tf_sup_C = 14.4+325/(1+60.5*qq_eff**(1.11))
-        tf_sup = tf_sup_L/(tf_sup_L+tf_sup_C*np.sqrt(qq_eff))
+        tf_sup_L = np.log(np.e+1.84 * self.beta_c * self.alpha_gamma * qq_eff)
+        tf_sup_C = 14.4 + 325./(1.0+60.5*qq_eff**(1.11))
+        tf_sup = tf_sup_L / (tf_sup_L+tf_sup_C*qq_eff**2)
         
         # Wavenumber compared to maximal free streaming #
-        qq_nu = 3.92 * qq * np.sqrt(self.num_degen_hdm/self.f_hdm)
+        qq_nu = 3.92 * qq * np.sqrt(self.num_degen_hdm)/self.f_hdm
         # Correction near maximal free streaming #
-        ratio = qq_nu**(-1.6)+qq_nu**(0.8)
-        max_fs_correction = 1.+1.2*(self.f_hdm**(0.64)*self.num_degen_hdm**(0.3+0.6*self.f_hdm))/ratio
+        ratio = qq_nu**(-1.6) + qq_nu**(0.8)
+        max_fs_correction = 1. + 1.2*(self.f_hdm**(0.64)*self.num_degen_hdm**(0.3+0.6*self.f_hdm))/ratio
         tf_master = tf_sup * max_fs_correction
         
         # Now compute the CDM+HDM+baryon transfer functions #

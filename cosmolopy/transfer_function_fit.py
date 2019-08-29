@@ -50,21 +50,22 @@ class TransferFunctionfit:
 
         z_drag_b1 = 0.313 * self.omhh**(-0.419) * (1.0+0.607 * self.omhh**0.674)
         z_drag_b2 = 0.238 * self.omhh**0.223
-        z_drag = 1291. * self.omhh**0.251 / (1.0+0.659 * self.omhh**0.828) * (1.0+z_drag_b1 * self.obhh**z_drag_b2)
-
+        z_drag = 1291. * self.omhh**0.251 / (1.0+0.659 * self.omhh**0.828)
+        z_drag *= (1.0 + z_drag_b1 * self.obhh**(z_drag_b2))
+        
         R_drag = 31.5 * self.obhh / theta_cmb**4 * (1000./(1.0+z_drag))
-        R_equality = 31.5 * self.obhh / theta_cmb**4 * (1000./z_equality)
+        R_equality = (31.5 * self.obhh / theta_cmb**4) * (1000./z_equality)
 
-        self.sound_horizon = 2. /3. / self.k_equality * np.sqrt(6./R_equality)
+        self.sound_horizon = (2./3.) / self.k_equality * np.sqrt(6./R_equality)
         self.sound_horizon *= np.log((np.sqrt(1.0+R_drag)+np.sqrt(R_drag+R_equality))/(1.0+np.sqrt(R_equality)))
 
-        self.k_silk = 1.6 * self.obhh**0.52 * self.omhh**0.73 * (1.0+(10.4 * self.omhh)**(-0.95))
+        self.k_silk = 1.6 * self.obhh**0.52 * self.omhh**0.73 * (1.0+(10.4 * self.omhh)**(-0.95))  #units of Mpc^-1#
 
         alpha_c_a1 = (46.9*self.omhh)**0.670 * (1.0+(32.1*self.omhh)**(-0.532))
         alpha_c_a2 = (12.0*self.omhh)**0.424 * (1.0+(45.0*self.omhh)**(-0.582))
-        self.alpha_c = alpha_c_a1**(-self.f_baryon) * alpha_c_a2**(-self.f_baryon**3)
+        self.alpha_c = alpha_c_a1**(-1.*self.f_baryon) * alpha_c_a2**(-1.*self.f_baryon**3)
 
-        beta_c_b1 = 0.944 / (1.0 + (458.*self.omhh)**(-0.708))
+        beta_c_b1 = 0.944 / (1.0 + (458.0*self.omhh)**(-0.708))
         beta_c_b2 =  (0.395 * self.omhh)**(-0.0266)
         self.beta_c = 1.0 / (1.0+beta_c_b1 * ((1.0-self.f_baryon)**beta_c_b2)-1.0)
 
