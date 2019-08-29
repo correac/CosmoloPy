@@ -46,7 +46,7 @@ def transfer_function(k, **cosmology):
     -----
 
     Uses transfer function code power.c from Eisenstein & Hu (1999 ApJ 511 5).
-    For baryonic effects, uses tf_fit.c from Eisenstein & Hu (1997 ApJ 496 605).
+    For baryonic effects, uses tf_fit.c from Eisenstein & Hu (1998 ApJ 496 605).
 
       http://background.uchicago.edu/~whu/transfer/transferpage.html
 
@@ -70,10 +70,8 @@ def transfer_function(k, **cosmology):
         # 	6) hubble       -- Hubble constant, in units of 100 km/s/Mpc 
         # 	7) redshift     -- The redshift at which to evaluate
         
-        if int(cosmology['N_nu']) != cosmology['N_nu']: raise TypeError('N_nu must be an integer.')
-        TF = Transfer_function(z_val,**cosmology)
-        tf_cb, tf_cbnu = TF.TF_k_mpc(k)
-        return tf_cb, tf_cbnu
+        TF = TransferFunction(z_val,**cosmology)
+        return TF.tf_k_mpc(k)
     
     else:
         # Baryonic effects are in use. This reduces the range of validity of the 
@@ -86,20 +84,16 @@ def transfer_function(k, **cosmology):
         #                        density, times the hubble parameter squared.
         #     2) f_baryon -- The fraction of baryons in all matter
         #     3) Tcmb -- the CMB temperature in Kelvin. Set to 2.728.
-        omhh = cosmology['omega_M_0'] * cosmology['h'] * cosmology['h']
         fbaryon = cosmology['omega_b_0'] / cosmology['omega_M_0']
         Tcmb = 2.728
-        #tf_fit.TFset_parameters(omhh, fbaryon, Tcmb)
-
         # Given a wavenumber in Mpc^-1, return the transfer function for
         # the cosmology held in the global variables.
         #if np.isscalar(k):
         #    return (tf_fit.TFfit_onek(k), power.TFmdm_onek_mpc(k))
         #else:
         #    return _vec_transfer_func(k, baryonic_effects)
-        TF = Transfer_function(z_val,**cosmology)
-        tf_cb, tf_cbnu = TF.TF_k_mpc(k)
-        return tf_cb, tf_cbnu
+        TF = TransferFunctionfit(cosmology['omega_M_0'], cosmology['h'], f_baryon, Tcmb)
+        return TF.tf_fit_k_mpc(k)
 
 
 def fgrowth(z, omega_M_0, unnormed=False):

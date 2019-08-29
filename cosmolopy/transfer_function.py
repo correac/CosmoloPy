@@ -1,62 +1,45 @@
 """
-    Fitting Formulae for CDM + Baryon + Massive Neutrino (MDM) cosmologies.
-    Daniel J. Eisenstein & Wayne Hu, Institute for Advanced Study.
-    
-    There are two primary routines here, one to set the cosmology, the
-    other to construct the transfer function for a single wavenumber k.
-    You should call the former once (per cosmology) and the latter as
-    many times as you want.
-    
-    TFmdm_set_cosm() -- User passes all the cosmological parameters as
-    arguments; the routine sets up all of the scalar quantites needed
-    computation of the fitting formula.  The input parameters are:
-    1) omega_matter -- Density of CDM, baryons, and massive neutrinos,
-    in units of the critical density.
-    2) omega_baryon -- Density of baryons, in units of critical.
-    3) omega_hdm    -- Density of massive neutrinos, in units of critical
-    4) degen_hdm    -- (Int) Number of degenerate massive neutrino species
-    5) omega_lambda -- Cosmological constant
-    6) hubble       -- Hubble constant, in units of 100 km/s/Mpc
-    7) redshift     -- The redshift at which to evaluate.
-    
-    TFmdm_onek_mpc() -- User passes a single wavenumber, in units of Mpc^-1.
-    Routine returns the transfer function from the Eisenstein & Hu
-    fitting formula, based on the cosmology currently held in the
-    internal variables.  The routine returns T_cb (the CDM+Baryon
-    density-weighted transfer function), although T_cbn (the CDM+
-    Baryon+Neutrino density-weighted transfer function) is stored
-    in the global variable tf_cbnu.
-    
-    We also supply TFmdm_onek_hmpc(), which is identical to the previous
-    routine, but takes the wavenumber in units of h Mpc^-1.
-    
-    We hold the internal scalar quantities in global variables, so that
-    the user may access them in an external program, via "extern" declarations.
-    
-    Please note that all internal length scales are in Mpc, not h^-1 Mpc!
-    
+Fitting Formulae for CDM + Baryon + Massive Neutrino (MDM) cosmologies
+from the Eisenstein & Hu fitting formula (from Eisenstein & Hu, 1999 ApJ 511 5),
+based on the cosmology currently held in the internal variables.
+
+There are two primary functions in the class, one to set the cosmology
+(__init()__), the other to construct the transfer function for a
+wavenumber k (tf_k_mpc or tf_k_hmpc). These functions return tf_cb
+(the CDM+Baryon density-weighted transfer function) and tf_cbnu (the CDM+
+Baryon+Neutrino density-weighted transfer function).
+
+Please note that all internal length scales are in Mpc, not h^-1 Mpc!
 """
 import numpy as np
 
 
-class Transfer_function:
-    
+class TransferFunction:
     """ This routine takes cosmological parameters and a redshift and sets up
         all the internal scalar quantities needed to compute the transfer function.
         
-        INPUT:
-        **cosmo
-        omega_matter -- Density of CDM, baryons, and massive neutrinos,
-        (in units of the critical density).
-        omega_baryon -- Density of baryons, in units of critical.
-        omega_hdm    -- Density of massive neutrinos, in units of critical
-        omega_lambda -- Cosmological constant
-        hubble       -- Hubble constant, in units of 100 km/s/Mpc
-        N_nu         -- (Int) Number of degenerate massive neutrino species
-        redshift       -- The redshift to evaluate
-        OUTPUT:
+    Parameters
+    ----------
+    cosmo : dict
+    
+    Specify the cosmological parameters with the keys 'omega_M_0',
+    'omega_b_0', 'omega_n_0', 'N_nu', 'omega_lambda_0', 'h' and
+    'baryonic_effects'.
+
+    omega_matter -- Density of CDM, baryons, and massive neutrinos,
+    (in units of the critical density).
+    omega_baryon -- Density of baryons, in units of critical.
+    omega_hdm    -- Density of massive neutrinos, in units of critical
+    omega_lambda -- Cosmological constant
+    hubble       -- Hubble constant, in units of 100 km/s/Mpc
+    N_nu         -- (Int) Number of degenerate massive neutrino species
+    
+    redshift : scalar/array -- The redshift to evaluate
+    
+    Returns
+    -------
         
-        Sets many global variables for use in TF_k_mpc() """
+    Sets many global variables for use in tf_k_mpc() """
     
     def __init__(self, redshift, cosmo):
         
@@ -133,16 +116,18 @@ class Transfer_function:
         self.hubble = cosmo['h']    # Need to pass Hubble constant to TF_k_hmpc() #
     
     
-    def TF_k_mpc(self,kk):
+    def tf_k_mpc(self,kk):
         """
-            Given a wavenumber in Mpc^-1, return the transfer function for the
-            cosmology held in the global variables.
-            Input: kk -- Wavenumber in Mpc^-1
-            Output: The following are set as global variables:
-            growth_cb   -- the transfer function for density-weighted CDM + Baryon perturbations.
-            growth_cbnu -- the transfer function for density-weighted CDM + Baryon + Massive Neutrino perturbations.
-            The function returns growth_cb
-            """
+        Parameters
+        ----------
+        kk : array. Wavenumber in Mpc^-1.
+            
+        Returns
+        -------
+        The following are set as global variables:
+        growth_cb   -- the transfer function for density-weighted CDM + Baryon perturbations.
+        growth_cbnu -- the transfer function for density-weighted CDM + Baryon + Massive Neutrino perturbations.
+        """
         # Wavenumber rescaled by \Gamma #
         qq = kk / self.omhh * np.sqrt(self.theta_cmb)
         
@@ -183,18 +168,19 @@ class Transfer_function:
         # tf_cbnu: The transfer function for density-weighted CDM + Baryon + Massive Neutrino perturbations. #
         return tf_cb, tf_cbnu
 
-    def TF_k_hmpc(self,kk):
+    def tf_k_hmpc(self,kk):
         """
-            Given a wavenumber in h Mpc^-1, return the transfer function (TF) for the
-            cosmology held in the global variables.
-            Input: kk -- Wavenumber in h Mpc^-1 */
-            Output: The following are set as global variables:
-            growth_cb   -- the transfer function for density-weighted
-            CDM + Baryon perturbations.
-            growth_cbnu -- the transfer function for density-weighted
-            CDM + Baryon + Massive Neutrino perturbations.
-            The function returns growth_cb
+        Parameters
+        ----------
+        kk : array. Wavenumber in h Mpc^-1.
+
+        Returns
+        -------
+        The following are set as global variables:
+        growth_cb   -- the transfer function for density-weighted CDM + Baryon perturbations.
+        growth_cbnu -- the transfer function for density-weighted CDM + Baryon + Massive
+        Neutrino perturbations.
         """
         
-        return self.TF_k_mpc(kk * self.hubble)
+        return self.tf_k_mpc(kk * self.hubble)
     
