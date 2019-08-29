@@ -56,7 +56,7 @@ class TransferFunctionfit:
         R_equality = 31.5 * self.obhh / theta_cmb**4 * (1000./z_equality)
 
         self.sound_horizon = 2. /3. / self.k_equality * np.sqrt(6./R_equality)
-        self.sound_horizon *= np.log((np.sqrt(1.0+R_drag)+np.sqrt(R_drag+R_equality))/(1.0+sqrt(R_equality)))
+        self.sound_horizon *= np.log((np.sqrt(1.0+R_drag)+np.sqrt(R_drag+R_equality))/(1.0+np.sqrt(R_equality)))
 
         self.k_silk = 1.6 * self.obhh**0.52 * self.omhh**0.73 * (1.0+(10.4 * self.omhh)**(-0.95))
 
@@ -113,7 +113,7 @@ class TransferFunctionfit:
         T_c_C_noalpha = 14.2 + 386.0/(1.0+69.9 * q**1.08)
 
         T_c_tilde = T_c_ln_beta / (T_c_ln_beta+T_c_C_noalpha * q**2)
-        T_c_f = 1.0/(1.0+(xx/5.4)**4))
+        T_c_f = 1.0/(1.0+(xx/5.4)**4)
         T_c = T_c_f * T_c_tilde + (1.0-T_c_f) * T_c_tilde
 
         s_tilde = self.sound_horizon / (1.0+(self.beta_node / xx)**3)**(1./3.)

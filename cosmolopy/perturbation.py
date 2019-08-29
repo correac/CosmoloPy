@@ -84,7 +84,7 @@ def transfer_function(k, **cosmology):
         #                        density, times the hubble parameter squared.
         #     2) f_baryon -- The fraction of baryons in all matter
         #     3) Tcmb -- the CMB temperature in Kelvin. Set to 2.728.
-        fbaryon = cosmology['omega_b_0'] / cosmology['omega_M_0']
+        f_baryon = cosmology['omega_b_0'] / cosmology['omega_M_0']
         Tcmb = 2.728
         # Given a wavenumber in Mpc^-1, return the transfer function for
         # the cosmology held in the global variables.
