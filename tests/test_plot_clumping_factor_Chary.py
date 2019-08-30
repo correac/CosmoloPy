@@ -1,7 +1,7 @@
 import sys
 
 import numpy
-import pylab
+import matplotlib.pyplot as pylab
 
 import cosmolopy.reionization as cr
 
@@ -18,7 +18,7 @@ def plot_clumping_factor_Chary():
 
 if __name__ == "__main__":
     if len(sys.argv)==1:
-        print "Run with a filename argument to produce image files, e.g.:"
+        print("Run with a filename argument to produce image files, e.g.:")
     if len(sys.argv) > 1:
         filename = sys.argv[1]
     else:

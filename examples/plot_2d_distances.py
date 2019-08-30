@@ -22,7 +22,8 @@ def plot_DM(filename):
     # Set up a cosmology dictionary, with an array of matter density values.
     cosmo = {}
     dom = 0.01
-    om = numpy.atleast_2d(numpy.linspace(0.1, 1.0, (1.-0.1)/dom)).transpose()
+    range = 0.9/dom
+    om = numpy.atleast_2d(numpy.linspace(0.1, 1.0, range)).transpose()
     cosmo['omega_M_0'] = om
     cosmo['omega_lambda_0'] = 1. - cosmo['omega_M_0']
     cosmo['h'] = 0.701
@@ -50,7 +51,8 @@ def plot_DA(filename):
     # Set up a cosmology dictionary, with an array of matter density values.
     cosmo = {}
     dom = 0.01
-    om = numpy.atleast_2d(numpy.linspace(0.1, 1.0, (1.-0.1)/dom)).transpose()
+    range = 0.9/dom
+    om = numpy.atleast_2d(numpy.linspace(0.1, 1.0, range)).transpose()
     cosmo['omega_M_0'] = om
     cosmo['omega_lambda_0'] = 1. - cosmo['omega_M_0']
     cosmo['h'] = 0.701
@@ -126,9 +128,9 @@ def plot_dist_ony(z, dz, om, dom, dist, dh, name, mathname, filename=None):
 
 if __name__ == "__main__":
     if len(sys.argv)==1:
-        print "Run with a filename argument to produce image files, e.g.:"
-        print " python plot_2d_distances.py dist2d.png"
-        print " python plot_2d_distances.py dist2d.eps"
+        print("Run with a filename argument to produce image files, e.g.:")
+        print(" python plot_2d_distances.py dist2d.png")
+        print(" python plot_2d_distances.py dist2d.eps")
     if len(sys.argv) > 1:
         filename = sys.argv[1]
     else:

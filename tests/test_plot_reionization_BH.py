@@ -1,7 +1,7 @@
 """Reproduce some results from Bolton and Haehnelt (2007MNRAS.382..325B).
 """
 
-import pylab
+import matplotlib.pyplot as pylab
 
 import numpy
 import scipy.interpolate

@@ -1,12 +1,11 @@
 import numpy
-
+import matplotlib.pyplot as pylab
 import cosmolopy.utils as utils
-from cosmolopy.luminosityfunction import BrokenPowerlawSED
+from cosmolopy.luminosity_function import BrokenPowerlawSED
 
 def test_BrokenPowerlawSED(plot=False):
     """Test that the BrokenPowerlawSED has the right break and normalization.
     """
-    if plot: import pylab
     runtest_BrokenPowerlawSED(BrokenPowerlawSED(), plot=plot)
     runtest_BrokenPowerlawSED(BrokenPowerlawSED(s_ion=-2., s_red=-0.5), plot=plot)
     if plot: pylab.show()
@@ -26,7 +25,6 @@ def runtest_BrokenPowerlawSED(sed, plot=False):
     assert numpy.abs(numintegral - 1.) < 1e-6
 
     if plot:
-        import pylab
         wav = numpy.arange(100.,2000.,1.0)
         nu = sed.lambdanu(wav)
         pylab.subplot(121)

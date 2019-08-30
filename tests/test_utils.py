@@ -16,7 +16,7 @@ def test_integrate_piecewise(pieces=2, method='quad'):
     val = integrate_piecewise(func,x, method=method)
     table_val = 0.30614353532540296487
     diff = val[-1] - table_val
-    print "Error with %i %s pieces = %.3g" % (pieces, method, diff)
+    print("Error with %i %s pieces = %.3g" % (pieces, method, diff))
     numpy.testing.assert_almost_equal(val[-1], table_val, decimal=7)
 
 def test_PiecewisePowerlaw(n=4, plot=False):
@@ -41,7 +41,7 @@ def test_PiecewisePowerlaw(n=4, plot=False):
     numintegral3 = integrate_piecewise(weightedfunc, x, method='quad')
 
     if plot:
-        import pylab
+        import matplotlib.pyplot as pylab
 
         pylab.subplot(221)
         pylab.title('x vs. y')
@@ -94,14 +94,14 @@ def test_Extrapolate1d():
     x1 = numpy.linspace(0., 15., 100.)
 
     extrap = Extrapolate1d(x,y)
-    print extrap.extrap_string()
+    print(extrap.extrap_string())
     y1 = extrap(x1)
     ytrue = slope * x1 + intercept
 
     # Test extrapolation with a fixed slope.
     newslopes = [3.0, 2.0]
     extrap2 = Extrapolate1d(x, y, slopes=newslopes)
-    print extrap2.extrap_string()
+    print(extrap2.extrap_string())
     y2 = extrap2(x1)
 
     mask = numpy.logical_or(x1 >= x[5],
@@ -109,7 +109,7 @@ def test_Extrapolate1d():
 
     assert numpy.all(numpy.abs((y1 - ytrue)[mask]) < 1e-10)
 
-    import pylab
+    import matplotlib.pyplot as pylab
     pylab.plot(x, y, 'o')
     pylab.plot(x1, y1, '-')
     pylab.plot(x1, ytrue, ':')
@@ -117,7 +117,7 @@ def test_Extrapolate1d():
 
 if __name__ == '__main__':
 
-    import pylab
+    import matplotlib.pyplot as pylab
     pylab.figure()
     for i in range(4):
         test_Extrapolate1d()

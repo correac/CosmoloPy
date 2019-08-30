@@ -85,13 +85,15 @@ Look in the tests/ and examples/ directories for more examples.
 
 """
 
-import constants as cc
-import density as cden
-import distance as cd
-import perturbation as cp
-import reionization as cr
-import parameters as cparam
-import magnitudes as cmag
-import luminosityfunction as cl
+import cosmolopy.constants as cc
+import cosmolopy.density as cden
+import cosmolopy.distance as cd
+import cosmolopy.perturbation as cp
+import cosmolopy.reionization as cr
+import cosmolopy.parameters as cparam
+import cosmolopy.magnitudes as cmag
+import cosmolopy.luminosity_function as cl
+import cosmolopy.transfer_function
+import cosmolopy.transfer_function_fit
 
 fidcosmo = cparam.WMAP7_BAO_H0_mean(flat=True, extras=True)
