@@ -168,7 +168,7 @@ class TransferFunction:
         
         # tf_cb: The transfer function for density-weighted CDM + Baryon perturbations #
         # tf_cbnu: The transfer function for density-weighted CDM + Baryon + Massive Neutrino perturbations. #
-        return tf_cb, tf_cbnu
+        return tf_cb  #, tf_cbnu
 
     def tf_k_hmpc(self,kk):
         """

@@ -41,7 +41,7 @@ def test_PiecewisePowerlaw(n=4, plot=False):
     numintegral3 = integrate_piecewise(weightedfunc, x, method='quad')
 
     if plot:
-        import pylab
+        import matplotlib.pyplot as pylab
 
         pylab.subplot(221)
         pylab.title('x vs. y')
@@ -109,7 +109,7 @@ def test_Extrapolate1d():
 
     assert numpy.all(numpy.abs((y1 - ytrue)[mask]) < 1e-10)
 
-    import pylab
+    import matplotlib.pyplot as pylab
     pylab.plot(x, y, 'o')
     pylab.plot(x1, y1, '-')
     pylab.plot(x1, ytrue, ':')
@@ -117,7 +117,7 @@ def test_Extrapolate1d():
 
 if __name__ == '__main__':
 
-    import pylab
+    import matplotlib.pyplot as pylab
     pylab.figure()
     for i in range(4):
         test_Extrapolate1d()

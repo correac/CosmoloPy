@@ -125,7 +125,7 @@ class TransferFunctionfit:
         T_b = (T_b_1 + T_b_2) * (np.sin(xx_tilde) / (xx_tilde))
         
         T_full = self.f_baryon * T_b + (1.0-self.f_baryon) * T_c
-        return T_full, T_b, T_c #Full, baryon, CDM#
+        return T_full   #, T_b, T_c #Full, baryon, CDM#
     
     def tf_fit_k_hmpc(self, k):
         """

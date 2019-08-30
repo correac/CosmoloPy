@@ -666,7 +666,7 @@ def optical_depth_instant(z_r, x_ionH=1.0, x_ionHe=1.0, z_rHe = None,
     """
 
     if numpy.any(cden.get_omega_k_0(**cosmo) != 0):
-        raise ValueError, "Not valid for non-flat (omega_k_0 !=0) cosmology."
+        raise ValueError("Not valid for non-flat (omega_k_0 !=0) cosmology.")
 
 
     if z_rHe is not None:

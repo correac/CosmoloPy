@@ -1,7 +1,7 @@
 import sys
 
 import numpy
-import pylab
+import matplotlib.pyplot as pylab
 
 import cosmolopy.reionization as cr
 

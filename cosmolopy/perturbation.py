@@ -10,9 +10,11 @@ import numpy as np
 import scipy
 import scipy.special
 import scipy.integrate as si
-import Cosmolopy.constants as cc
-import Cosmolopy.density as cden
-
+import cosmolopy.constants as cc
+import cosmolopy.density as cden
+import cosmolopy.transfer_function as TF
+import cosmolopy.transfer_function_fit as TFfit
+import warnings
 
 def transfer_function(k, **cosmology):
     """The transfer function as a function of wavenumber k.
@@ -70,8 +72,8 @@ def transfer_function(k, **cosmology):
         # 	6) hubble       -- Hubble constant, in units of 100 km/s/Mpc 
         # 	7) redshift     -- The redshift at which to evaluate
         
-        TF = TransferFunction(z_val,**cosmology)
-        return TF.tf_k_mpc(k)
+        tf = TF.TransferFunction(z_val,**cosmology)
+        return tf.tf_k_mpc(k)
     
     else:
         # Baryonic effects are in use. This reduces the range of validity of the 
@@ -92,8 +94,8 @@ def transfer_function(k, **cosmology):
         #    return (tf_fit.TFfit_onek(k), power.TFmdm_onek_mpc(k))
         #else:
         #    return _vec_transfer_func(k, baryonic_effects)
-        TF = TransferFunctionfit(cosmology['omega_M_0'], cosmology['h'], f_baryon, Tcmb)
-        return TF.tf_fit_k_mpc(k)
+        tf = TFfit.TransferFunctionfit(cosmology['omega_M_0'], cosmology['h'], f_baryon, Tcmb)
+        return tf.tf_fit_k_mpc(k)
 
 
 def fgrowth(z, omega_M_0, unnormed=False):
@@ -547,8 +549,8 @@ def power_spectrum(k, z, **cosmology):
     else:
         deltaSqr = norm_power(**cosmology)
 
-    tf_cb, tf_cbnu = transfer_function(k, **cosmology)
-    transFunc = tf_cb #transfer_function(k, **cosmology)[0]
+    transFunc = transfer_function(k, **cosmology)
+    #transFunc = tf_cb #transfer_function(k, **cosmology)[0]
 
     # This equals D1(z)/D1(0)
     growthFact = fgrowth(z, omega_M_0)

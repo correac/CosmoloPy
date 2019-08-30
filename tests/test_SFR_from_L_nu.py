@@ -6,7 +6,7 @@ import numpy
 import cosmolopy.parameters as cparam
 
 import cosmolopy.magnitudes as magnitudes
-import cosmolopy.luminosityfunction as luminosityfunction
+import cosmolopy.luminosity_function as luminosityfunction
 
 
 def test_sfr():

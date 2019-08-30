@@ -383,7 +383,7 @@ class LFHistory(Saveable):
                     'alpha':self._alphafunc(t)}
         elif self.extrap_var == 'z':
             ### FIX THIS ###
-            raise NotImplementedError, "params_t not implemented for z interps!"
+            raise NotImplementedError("params_t not implemented for z interps!")
 
     def params_z(self, z):
         """Return interp/extrapolated Schechter function parameters."""
@@ -456,7 +456,7 @@ def plotLFevo(hist=None,
 
     if not skipIon:
         xH = hist.ionization(zPlot, maglim)
-    import pylab
+    import matplotlib.pyplot as pylab
     pylab.figure(1)
     pylab.gcf().set_label('LFion_vs_z')
     if skipIon:
@@ -734,7 +734,7 @@ if __name__ == '__main__':
     else:
         prefix, extension = os.path.splitext(options.filename)
     
-    import pylab
+    import matplotlib.pyplot as pylab
 
     plotLFevo() # Canonical observed LF
     plotLFevo(extrap_var='z')

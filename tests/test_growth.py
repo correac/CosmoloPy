@@ -3,7 +3,6 @@ import numpy
 import numpy.testing.utils as ntest
 import cosmolopy.perturbation as cp
 import cosmolopy.constants as cc
-
 import matplotlib.pyplot as pylab
 
 def cosmo_wmap_5():

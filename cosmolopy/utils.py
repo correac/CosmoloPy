@@ -478,9 +478,9 @@ def integrate_piecewise(function, x, method='romberg', return_pieces=False,
     
     x = numpy.asarray(x)
     if numpy.any(x[1:] - x[:-1] < 0):
-        raise ValueError, "Array x must increase monotonically."
+        raise ValueError("Array x must increase monotonically.")
     if numpy.any(numpy.isnan(x)):
-        raise ValueError, "Array x must not include NaN values." 
+        raise ValueError("Array x must not include NaN values.")
     integral_list = [0.0]
     if method is None:
         method = 'quad'
@@ -501,7 +501,7 @@ def integrate_piecewise(function, x, method='romberg', return_pieces=False,
                                                **args)
             integral_list.append(integral)
     else:
-        raise ValueError, "Method '%s' unknown." % method
+        raise ValueError("Method '%s' unknown." % method)
 
     integrals = numpy.asarray(integral_list)
     if return_pieces:

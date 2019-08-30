@@ -92,7 +92,7 @@ import cosmolopy.perturbation as cp
 import cosmolopy.reionization as cr
 import cosmolopy.parameters as cparam
 import cosmolopy.magnitudes as cmag
-import cosmolopy.luminosityfunction as cl
+import cosmolopy.luminosity_function as cl
 import cosmolopy.transfer_function
 import cosmolopy.transfer_function_fit
 
