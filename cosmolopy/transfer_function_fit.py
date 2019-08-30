@@ -1,20 +1,20 @@
 """
-    The following routines implement all of the fitting formulae in
-    Eisenstein \& Hu (1998).
-    
-    There are seven functions in the class. __init()__ sets the cosmology.
-    tf_fit_k_hmpc() and tf_fit_k_mpc() calculate the transfer function for an
-    arbitrary CDM+baryon universe using the fitting formula in Section 3 of the
-    paper: Eisenstein \& Hu (1998) ApJ, Vol. 496, Issue 2, pp. 605-614.
-    
-    The functions tf_sound_horizon_fit(), tf_k_peak(), tf_nowiggles(), and
-    tf_zerobaryon() calculate other quantities given in Section 4 of the paper.
-    
-    Please note that while the routines use Mpc^-1 units internally, this driver
-    has been written to take an array of wavenumbers in units of h Mpc^-1. On the
-    other hand, if you want to use Mpc^-1 externally, you can do this by
-    altering the variables you pass to the driver: omega0 -> omega0*hubble*hubble,
-    hubble -> 1.0."""
+The following routines implement all of the fitting formulae in
+Eisenstein \& Hu (1998).
+
+There are seven functions in the class. __init()__ sets the cosmology.
+tf_fit_k_hmpc() and tf_fit_k_mpc() calculate the transfer function for an
+arbitrary CDM+baryon universe using the fitting formula in Section 3 of the
+paper: Eisenstein \& Hu (1998) ApJ, Vol. 496, Issue 2, pp. 605-614.
+
+The functions tf_sound_horizon_fit(), tf_k_peak(), tf_nowiggles(), and
+tf_zerobaryon() calculate other quantities given in Section 4 of the paper.
+
+Please note that while the routines use Mpc^-1 units internally, this driver
+has been written to take an array of wavenumbers in units of h Mpc^-1. On the
+other hand, if you want to use Mpc^-1 externally, you can do this by
+altering the variables you pass to the driver: omega0 -> omega0*hubble*hubble,
+hubble -> 1.0."""
 
 import numpy as np
 
@@ -22,38 +22,39 @@ class TransferFunctionfit:
     
     def __init__(self, omega0, hubble, f_baryon, Tcmb):
         """
-            Parameters
-            ----------
-            omega0: scalar
-            The density of CDM and baryons, in units of critical dens
-            hubble: scalar
-            Hubble constant, in units of 100 km/s/Mpc
-            f_baryon: scalar
-            Fraction of baryons to CDM
-            Tcmb: scalar
-            The temperature of the CMB in Kelvin. Tcmb<=0 forces use of the COBE value of 2.728 K.
-            
-            Note
-            ----
-            Units are always Mpc, never h^-1 Mpc.
-            """
+        Parameters
+        ----------
+        omega0: scalar
+        The density of CDM and baryons, in units of critical dens
+        hubble: scalar
+        Hubble constant, in units of 100 km/s/Mpc
+        f_baryon: scalar
+        Fraction of baryons to CDM
+        Tcmb: scalar
+        The temperature of the CMB in Kelvin. Tcmb<=0 forces use of the COBE value of 2.728 K.
         
+        Note
+        ----
+        Units are always Mpc, never h^-1 Mpc.
+        """
+        
+        self.omega0 = omega0
         self.hubble = hubble
         self.omhh = omega0 * self.hubble**2
         self.f_baryon = f_baryon
         self.obhh = self.omhh * self.f_baryon
         if Tcmb<=0.0: Tcmb=2.728
-        theta_cmb = Tcmb/2.7
+        self.theta_cmb = Tcmb/2.7
         
-        z_equality = 2.5e4 * self.omhh / theta_cmb**4  # Really 1+z #
-        self.k_equality = 7.46e-2 * self.omhh / theta_cmb**2
+        z_equality = 2.5e4 * self.omhh / self.theta_cmb**4  # Really 1+z #
+        self.k_equality = 7.46e-2 * self.omhh / self.theta_cmb**2
         
         z_drag_b1 = 0.313 * self.omhh**(-0.419) * (1.0+0.607 * self.omhh**0.674)
         z_drag_b2 = 0.238 * self.omhh**0.223
         z_drag = 1291. * (self.omhh**0.251 / (1.0+0.659 * self.omhh**0.828))*(1.0 + z_drag_b1 * self.obhh**(z_drag_b2))
         
-        R_drag = (31.5 * self.obhh / theta_cmb**4) * (1000./z_drag)
-        R_equality = (31.5 * self.obhh / theta_cmb**4) * (1000./z_equality)
+        R_drag = (31.5 * self.obhh / self.theta_cmb**4) * (1000./z_drag)
+        R_equality = (31.5 * self.obhh / self.theta_cmb**4) * (1000./z_equality)
         
         s_1 = (2./(3.* self.k_equality)) * np.sqrt(6./R_equality)
         s_2 = np.log((np.sqrt(1.0+R_drag)+np.sqrt(R_drag+R_equality))/(1.0+np.sqrt(R_equality)))
@@ -83,22 +84,22 @@ class TransferFunctionfit:
     
     def tf_fit_k_mpc(self,k):
         """
-            Parameters
-            ----------
-            k : array
-            Wavenumber in Mpc^-1.
-            
-            Returns
-            -------
-            Returns the value of the full transfer function fitting formula.
-            This is the form given in Section 3 of Eisenstein & Hu (1998).
-            
-            tf_full : array
-            The full fitting formula, eq. (16), for the matter transfer function.
-            tf_baryon : array
-            The baryonic piece of the full fitting formula, eq. (21).
-            tf_cdm : array
-            The CDM piece of the full fitting formula, eq. (17). """
+        Parameters
+        ----------
+        k : array
+        Wavenumber in Mpc^-1.
+        
+        Returns
+        -------
+        Returns the value of the full transfer function fitting formula.
+        This is the form given in Section 3 of Eisenstein & Hu (1998).
+        
+        tf_full : array
+        The full fitting formula, eq. (16), for the matter transfer function.
+        tf_baryon : array
+        The baryonic piece of the full fitting formula, eq. (21).
+        tf_cdm : array
+        The CDM piece of the full fitting formula, eq. (17). """
         
         # Notes: Units are Mpc, not h^-1 Mpc. #
         
@@ -128,37 +129,37 @@ class TransferFunctionfit:
     
     def tf_fit_k_hmpc(self, k):
         """
-            Parameters
-            ----------
-            k : array
-            Wavenumber in h Mpc^-1.
-            
-            Returns
-            -------
-            The value of the full transfer function fitting formula.
-            
-            tf_full : array
-            The full fitting formula, eq. (16), for the matter transfer function.
-            tf_baryon : array
-            The baryonic piece of the full fitting formula, eq. (21).
-            tf_cdm : array
-            The CDM piece of the full fitting formula, eq. (17).
-            """
+        Parameters
+        ----------
+        k : array
+        Wavenumber in h Mpc^-1.
+        
+        Returns
+        -------
+        The value of the full transfer function fitting formula.
+        
+        tf_full : array
+        The full fitting formula, eq. (16), for the matter transfer function.
+        tf_baryon : array
+        The baryonic piece of the full fitting formula, eq. (21).
+        tf_cdm : array
+        The CDM piece of the full fitting formula, eq. (17).
+        """
         return self.tf_fit_k_mpc(k * self.hubble)
-
+    
     # ======================= Approximate forms =========================== #
-
+    
     def tf_sound_horizon_fit(self, h=None):
         """
         Parameters
         ----------
         h : scalar
-            Hubble constant, in units of 100 km/s/Mpc.
-            
+        Hubble constant, in units of 100 km/s/Mpc.
+        
         Returns
         -------
         The approximate value of the sound horizon, in h^-1 Mpc.
-
+        
         Note
         ----
         If you prefer to have the answer in  units of Mpc, use h -> 1.
@@ -172,6 +173,7 @@ class TransferFunctionfit:
             s_fit = 44.5 * np.log(9.83/om_hh)/np.sqrt(1.0+10.0 * ob_hh**0.75)
             return s_fit * h
 
+
     def tf_k_peak(self):
         """
         Returns
@@ -180,14 +182,15 @@ class TransferFunctionfit:
         """
         k_peak_mpc = 2.5 * np.pi * (1.0+0.217*self.omhh) / self.tf_sound_horizon_fit(h=1.0)
         return k_peak_mpc / self.hubble
+        
 
     def tf_nowiggles(self, k_hmpc):
         """
         Parameters
         ----------
         k_hmpc : array
-            Wavenumber in h Mpc^-1.
-            
+        Wavenumber in h Mpc^-1.
+        
         Returns
         -------
         The value of an approximate transfer function that captures the
@@ -196,11 +199,12 @@ class TransferFunctionfit:
         the sound horizon is included.
         """
 
-        k = k_hmpc * self.hubble;    # Convert to Mpc^-1 #
-        q = k / 13.41 / self.k_equality
-        xx = k * self.tf_sound_horizon_fit(h=1.0)
+        k = k_hmpc # Units of h Mpc^-1 #
+        q = k * self.theta_cmb**2/ (self.omega0 * self.hubble)
 
+        xx = k * self.tf_sound_horizon_fit(h=1.0)
         gamma_eff = self.omhh * (self.alpha_gamma+(1.0-self.alpha_gamma) / (1.0+(0.43*xx)**4))
+
         q_eff = q * self.omhh / gamma_eff
 
         T_nowiggles_L0 = np.log(2.0 * np.e + 1.8 * q_eff)
@@ -214,17 +218,20 @@ class TransferFunctionfit:
         Parameters
         ----------
         k_hmpc : array
-            Wavenumber in h Mpc^-1.
-            
+        Wavenumber in h Mpc^-1.
+        
         Returns
         -------
         The value of the transfer function for a zero-baryon universe.
         """
-        k = k_hmpc * self.hubble    # Convert to Mpc^-1 #
-        q = k / 13.41 / self.k_equality
-
+        q = k_hmpc * self.theta_cmb**2/ (self.omega0 * self.hubble)
+        
         T_0_L0 = np.log(2.0*np.e+1.8*q)
-        T_0_C0 = 14.2 + 731.0/(1+62.5*q)
+        T_0_C0 = 14.2 + 731.0/(1.0+62.5*q)
         return T_0_L0/(T_0_L0+T_0_C0*q*q)
+
+
+
+
 
 

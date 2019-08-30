@@ -310,21 +310,21 @@ class LFHistory(Saveable):
                                               bounds_behavior=MStar_bounds,
                                               **extrap_args
                                               )
-        print "M*:",
-        print self._MStarfunc.extrap_string()
+        print("M*:")
+        print(self._MStarfunc.extrap_string())
 
         self._phiStarfunc = utils.Extrapolate1d(self.xobs, self.phiStar,
                                                 bounds_behavior=phiStar_bounds,
                                                 **extrap_args
                                                 )
-        print "phi*:",
-        print self._phiStarfunc.extrap_string()
+        print("phi*:")
+        print(self._phiStarfunc.extrap_string())
         self._alphafunc = utils.Extrapolate1d(self.xobs, self.alpha,
                                               bounds_behavior=alpha_bounds,
                                               **extrap_args
                                               )
-        print "alpha:",
-        print self._alphafunc.extrap_string()
+        print("alpha:")
+        print(self._alphafunc.extrap_string())
         
         self._SED = BrokenPowerlawSED(**sedParams)
         self._rQL = self._SED.iPhotonRateRatio(wavelength)
@@ -434,7 +434,7 @@ def plotLFevo(hist=None,
         ltot = schechterCumuLM(magnitudeAB=maglim,
                                MStar=MStar, phiStar=phiStar, alpha=alpha)
 
-    print hist._MStarfunc.extrap_string()
+    print(hist._MStarfunc.extrap_string())
 
     zPlot = numpy.arange(z.min()-0.1, z_max, 0.1)
     tPlot = cd.age(zPlot, **cosmo)[0] / cc.yr_s
@@ -729,8 +729,8 @@ if __name__ == '__main__':
         options.filename = args[0]
 
     if options.filename is None:
-        print "No filename given."
-        print usage
+        print("No filename given.")
+        print(usage)
     else:
         prefix, extension = os.path.splitext(options.filename)
     

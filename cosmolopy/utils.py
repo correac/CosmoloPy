@@ -11,7 +11,7 @@ import scipy.interpolate
 
 import cosmolopy.distance as cd
 import cosmolopy.constants as cc
-from saveable import Saveable
+from cosmolopy.saveable import Saveable
 
 class AgeSpacedRedshift(Saveable):
     """Set up uniform time array and corresponding redshift array.
@@ -35,8 +35,8 @@ class AgeSpacedRedshift(Saveable):
         self.t = numpy.arange(self.tmin, self.tmax + 1.01 * self.dt, self.dt)
         self.t_yr = self.t / cc.yr_s
         self.z = self.redshiftfunc(self.t)
-        print " Using %i points in t, dt = %.3g yr." % (len(self.t_yr),
-                                                        self.dt_yr)
+        print(" Using %i points in t, dt = %.3g yr." % (len(self.t_yr),
+                                                        self.dt_yr))
 
     def age_Gyr(self, z):
         return self.agefunc(z)/cc.yr_s/1e9
@@ -567,8 +567,8 @@ class Normalize:
         newfunction = lambda x: function(x)/integral
 
         if not self.quiet:
-            print "Normalization factor for %s is %.3g" % (function.__name__,
-                                                           1./integral)
+            print("Normalization factor for %s is %.3g" % (function.__name__,
+                                                           1./integral))
         # inspired by
         # http://wiki.python.org/moin/PythonDecoratorLibrary#DifferentDecoratorForms
 

@@ -6,11 +6,11 @@ import numpy
 import scipy
 import scipy.integrate as si
 
-import perturbation as cp
-import distance as cd
-import constants as cc
-import density as cden
-import utils as cu
+import cosmolopy.perturbation as cp
+import cosmolopy.distance as cd
+import cosmolopy.constants as cc
+import cosmolopy.density as cden
+import cosmolopy.utils as cu
 
 def delta_lambda_delta_dl(z, delta_dl, **cosmo):
     """The Lyman-alpha wavelength shift given light-travel distance.
@@ -250,8 +250,7 @@ def _udot(u, t, coeff_rec_func, redshift_func, ion_func, bubble=True):
         udot = -1. * crf * x**2
     #if (abs(round(z,1) - z) < 0.01):
     if (False):
-        print ("z=%.3f; t=%.1g; c=%.2g; udot=%.2g; w,x,u = %.2g, %.2g, %.2g" % 
-               (z, t, crf, udot, w, x, u))
+        print("z=%.3f; t=%.1g; c=%.2g; udot=%.2g; w,x,u = %.2g, %.2g, %.2g" %(z, t, crf, udot, w, x, u))
     return udot
 
 def integrate_ion_recomb(z,
@@ -327,8 +326,7 @@ def integrate_ion_recomb(z,
     else:
         alpha_B_cm = alpha_B
     alpha_B = alpha_B_cm * cc.Gyr_s / (cc.Mpc_cm**3.)
-    print ("Recombination rate alpha_B = %.4g (Mpc^3 Gyr^-1) = %.4g (cm^3 s^-1)" 
-           % (alpha_B, alpha_B_cm))
+    print("Recombination rate alpha_B = %.4g (Mpc^3 Gyr^-1) = %.4g (cm^3 s^-1)"% (alpha_B, alpha_B_cm))
 
     # Normalize power spectrum.
     if 'deltaSqr' not in cosmo:
@@ -682,7 +680,7 @@ def optical_depth_instant(z_r, x_ionH=1.0, x_ionHe=1.0, z_rHe = None,
         # Difference due to fully ionized He (added to tau later):
         tau_short_He = tau_short_all - tau_short_H
         if(verbose > 0) :
-            print "tau_short_He = ", tau_short_He            
+            print("tau_short_He = ", tau_short_He )
 
     rho_crit, rho_0, n_He_0, n_H_0 = cden.baryon_densities(**cosmo)
 
@@ -696,9 +694,9 @@ def optical_depth_instant(z_r, x_ionH=1.0, x_ionHe=1.0, z_rHe = None,
     x = n_e / n_p
 
     if(verbose > 0) :
-        print "n_He/n_H = ", n_He_0 / n_H_0
-        print "x = ne/np = ", x
-        print "n_e/n_H_0 = ", n_e/n_H_0
+        print("n_He/n_H = ", n_He_0 / n_H_0)
+        print("x = ne/np = ", x)
+        print("n_e/n_H_0 = ", n_e/n_H_0)
 
     H_0 = cc.H100_s * cosmo['h']
 

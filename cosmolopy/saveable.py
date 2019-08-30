@@ -68,8 +68,8 @@ class Saveable(object):
                 pickle.dump(v, picfile)
             except (TypeError, pickle.PicklingError) as err:
                 if hasattr(self, 'verbose') and self.verbose:
-                    print "Won't pickle", k, type(v), ": "
-                    print "'", err, "'"
+                    print("Won't pickle", k, type(v), ": ")
+                    print("'", err, "'")
                 del sdict[k]
         return sdict
     def __getstate__(self):

@@ -1,42 +1,14 @@
 #!/usr/bin/env python
 from setuptools import setup, find_packages, Extension
 import os
-#import nose
-
-eh_dir = os.path.join('.','cosmolopy','EH')
-
-### I used to let distutils run swig for me on power.i to create
-### power_wrap.c and power.py, but that stopped working for some
-### reason.
-# Stuff used to build the cosmolopy.EH._power module:
-#power_module = Extension('cosmolopy.EH._power',
-#                         sources=[os.path.join(eh_dir, 'power.i'),
-#                                  os.path.join(eh_dir, 'power.c')]
-#                         )
-power_module = Extension('cosmolopy.EH._power',
-                         sources=[os.path.join(eh_dir, 'power_wrap.c'),
-                                  os.path.join(eh_dir, 'power.c')]
-                         )
-tf_fit_module = Extension('cosmolopy.EH._tf_fit',
-                         sources=[os.path.join(eh_dir, 'tf_fit_wrap.c'),
-                                  os.path.join(eh_dir, 'tf_fit.c')]
-                         )
 
 packages = find_packages()
 setup(
     name = "CosmoloPy",
     version = "0.1.105",
     packages = packages,
-#    package_data = {
-#        # If any package contains *.so files, include them:
-#        '': ['*.so'],
-#        },
     install_requires = ['numpy', 'scipy',],
-
-    ext_modules = [power_module, tf_fit_module],
-
-    tests_require = ['nose', 'matplotlib'],
-    test_suite = 'nose.collector',
+    tests_require = ['matplotlib'],
 
     # metadata for upload to PyPI
     author = "Roban Hultman Kramer",
@@ -47,6 +19,7 @@ setup(
                 "luminosity magnitude reionization Press-Schechter Schecter"),
     license = "MIT",
     long_description = \
+      
 """CosmoloPy is a package of cosmology routines built on NumPy/SciPy.
 
 Capabilities include

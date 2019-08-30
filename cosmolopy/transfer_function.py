@@ -64,8 +64,8 @@ class TransferFunction:
         
         # Compute the equality scale. #
         # z_equality Redshift of matter-radiation equality, eq. (1) #
-        self.z_equality = 25000.0*self.omhh/self.theta_cmb**4   # Actually 1+z_eq #
-        self.k_equality = 0.0746*self.omhh/self.theta_cmb**2 # The comoving wave number of the horizon at equality #
+        self.z_equality = 2.5e4 * self.omhh/self.theta_cmb**4   # Actually 1+z_eq #
+        self.k_equality = 7.46e-2 * self.omhh/self.theta_cmb**2 # The comoving wave number of the horizon at equality #
         
         # Compute the drag epoch and sound horizon, eq. (2) #
         z_drag_b1 = 0.313 * self.omhh**(-0.419) * (1+0.607 * self.omhh**0.674)
@@ -91,7 +91,7 @@ class TransferFunction:
         self.omega_matter_z = cosmo['omega_M_0'] * (1.0+redshift)**3/omega_denom
         
         # D_1(z) -- the growth function as k->0 #
-        self.growth_k0 = self.z_equality/(1.0+redshift) * 2.5 * self.omega_matter_z
+        self.growth_k0 = (self.z_equality/(1.0+redshift)) * 2.5 * self.omega_matter_z
         ratio = self.omega_matter_z**(4.0/7.0)-self.omega_lambda_z
         ratio += (1.0+self.omega_matter_z/2.0)*(1.0+self.omega_lambda_z/70.0)
         self.growth_k0 /= ratio
@@ -129,7 +129,7 @@ class TransferFunction:
         growth_cbnu -- the transfer function for density-weighted CDM + Baryon + Massive Neutrino perturbations.
         """
         # Wavenumber rescaled by \Gamma #
-        qq = kk / self.omhh * self.theta_cmb**2
+        qq = kk * self.theta_cmb**2 / self.omhh
         
         # The epoch of free-streaming for a given scale #
         y_freestream = 17.2 * self.f_hdm * (1.+0.488 * self.f_hdm**(-7.0/6.0))
@@ -146,6 +146,7 @@ class TransferFunction:
         # Compute the master function #
         ratio = 1.+(kk*self.sound_horizon_fit*0.43)**4
         gamma_eff = self.omhh * (self.alpha_gamma+(1.-self.alpha_gamma)/ratio)
+        
         # Wavenumber rescaled by effective Gamma #
         qq_eff = qq * self.omhh / gamma_eff
         
