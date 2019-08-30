@@ -30,7 +30,7 @@ def test_distances(threshold = 1e-3):
     """Compare distance measures with calculations from http://icosmo.org/"""
     cosmo = cosmo_wmap_5()
 
-    print "Comparing distances with calculations from http://icosmo.org/"
+    print("Comparing distances with calculations from http://icosmo.org/")
 
     # load external distance calculations
     # z  DA(z)   DT(z)   DL(z) 
@@ -65,8 +65,8 @@ def test_distances(threshold = 1e-3):
     for i in range(len(labels)):
         diff = (cd_dists[i] - ic_dists[:,i+1]) / ic_dists[:,i+1]
         maxdiff = numpy.max(numpy.abs(diff[ic_dists[:,i+1] > 0]))
-        print "Maximum fraction difference in %s is %e." % (labels[i],
-                                                            maxdiff)
+        print("Maximum fraction difference in %s is %e." % (labels[i],
+                                                            maxdiff))
         assert(numpy.all(maxdiff < threshold[i]))
         pylab.plot(ic_dists[:,0], 
                    diff, 
@@ -81,7 +81,7 @@ def test_distances(threshold = 1e-3):
 
 def test_hubble(threshold = 1e-7):
     cosmo = cosmo_wmap_5()
-    print "Comparing hubble constant with calculations from http://icosmo.org/"
+    print("Comparing hubble constant with calculations from http://icosmo.org/")
 
     # load external distance calculations
     # z H(z)
@@ -105,10 +105,10 @@ def test_hubble(threshold = 1e-7):
     diff = (ic_hz[:,1] - cd_hz) / ic_hz[:,1]
     
     maxdiff = numpy.max(numpy.abs(diff))
-    print "Maximum fraction difference in %s is %e." % (label,
-                                                        maxdiff)
+    print("Maximum fraction difference in %s is %e." % (label,
+                                                        maxdiff))
     if maxdiff > threshold:
-        print "Warning: difference exceeds threshold %e !!!" % threshold
+        print("Warning: difference exceeds threshold %e !!!" % threshold)
     assert(maxdiff < threshold)
 
     pylab.plot(z,
