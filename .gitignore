@@ -8,5 +8,6 @@ build/
 dist/
 .idea/
 .DS_Store
+examples/.DS_Store
 cosmolopy/__pycache__
 cosmolopy/.DS_Store
