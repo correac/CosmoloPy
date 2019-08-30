@@ -7,13 +7,13 @@ import cosmolopy.constants as cc
 import matplotlib.pyplot as pylab
 
 def cosmo_wmap_5():
-    """Cosmology from Komatsu et al. 2008 (arXiv:0803.0547v1)"""
+    """Cosmology from Komatsu et al. 2008 (arXiv:0803.0547v1 )"""
     cosmo = {}
     omega_c = 0.233 #+-0.013, 
     cosmo['omega_b_0'] = 0.0462 #+-0.0015, 
     cosmo['omega_M_0'] = omega_c + cosmo['omega_b_0'] # 0.2792
     cosmo['omega_k_0'] = 0.0
-    cosmo['omega_lambda_0'] = (1. - cosmo['omega_M_0'] - cosmo['omega_k_0'])
+    cosmo['omega_lambda_0'] =  (1. - cosmo['omega_M_0'] - cosmo['omega_k_0'])
     #cosmo['omega_lambda_0'] = 0.721 #+-0.015
     cosmo['h'] = 0.701 #+-0.0013 
     cosmo['n'] = 0.960 #+0.014-0.013
